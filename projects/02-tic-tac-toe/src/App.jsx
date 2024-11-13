@@ -6,13 +6,23 @@ import { Square } from "./components/Square";
 import { TURS } from "./contants";
 import { checkWinnerFrom } from "./logic/board";
 import { WinnerModal } from "./components/winnerModal";
-
 import { checkEndGame } from "./logic/board";
+import { saveGameToStorage, resetGameStorage } from "./logic/storage";
 
 function App() {
-	const [board, setBoard] = useState(Array(9).fill(null));
+	console.log("render");
 
-	const [turn, setTurn] = useState(TURS.x);
+	const [board, setBoard] = useState(() => {
+		console.log("Inicialización del estado del board");
+
+		const boardFromStorage = window.localStorage.getItem("board");
+		return boardFromStorage ? JSON.parse(boardFromStorage) : Array(9).fill(null);
+	});
+
+	const [turn, setTurn] = useState(() => {
+		const turnFromStorage = window.localStorage.getItem("turn");
+		return turnFromStorage ? turnFromStorage : TURS.x;
+	});
 
 	//null es que no hay ganador, false es un empate
 	const [winner, setWinner] = useState(null);
@@ -21,6 +31,10 @@ function App() {
 		setBoard(Array(9).fill(null));
 		setTurn(TURS.x);
 		setWinner(null);
+
+		// window.localStorage.removeItem("board");
+		// window.localStorage.removeItem("turn");
+		resetGameStorage();
 	};
 
 	const updateBoard = (index) => {
@@ -35,6 +49,14 @@ function App() {
 
 		const newTurn = turn === TURS.x ? TURS.o : TURS.x;
 		setTurn(newTurn);
+
+		//Guardar aqui partida
+		// window.localStorage.setItem("board", JSON.stringify(newBoard));
+		// window.localStorage.setItem("turn", newTurn);
+		saveGameToStorage({
+			board: newBoard,
+			turn: newTurn,
+		});
 
 		//revisar si existe un ganador
 
